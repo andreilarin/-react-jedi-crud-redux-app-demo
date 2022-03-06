@@ -3,31 +3,29 @@ import Input from "./common/Input";
 import Button from './common/Button';
 import {nanoid} from "nanoid";
 import { useSelector, useDispatch } from 'react-redux';
-import { getAllPeople } from '../store/selectors/people';
-import { setPeople } from '../store/actions/people';
+import { getAllStarships } from '../store/selectors/starships';
+import { setStarship } from '../store/actions/starships';
+import {starshipsColumns} from "../services/spaceshipsService";
 
-
-import {peopleColumns} from "../services/peopleService";
-
-const initialPersonData = peopleColumns.reduce((columns, columnName) => {
+const initialStarshipsData = starshipsColumns.reduce((columns, columnName) => {
     columns[columnName] = '';
     return columns;
 }, {})
 
-const PeopleForm = ({history, match}) => {
+const StarshipForm = ({history, match}) => {
     const [formErrors, setFormErrors] = useState({});
 
     const dispatch = useDispatch();
-    const people = useSelector(state => getAllPeople(state));
+    const starships = useSelector(state => getAllStarships(state));
 
-    const [personData, setPersonData] = useState({...initialPersonData});
+    const [starshipsData, setStarshipsData] = useState({...initialStarshipsData});
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
-        const personId = match.params.id;
-        if (personId === "new") return;
-        const existingPersonData = people.find(person => person.id === personId)
-        setPersonData(existingPersonData)
+        const starshipId = match.params.id;
+        if (starshipId === "new") return;
+        const existingStarshipsData = starships.find(starship => starship.id === starshipId)
+        setStarshipsData(existingStarshipsData)
         setEditMode(true);
     }, [])
 
@@ -44,45 +42,45 @@ const PeopleForm = ({history, match}) => {
 
     const onSubmit = (event) => {
         event.preventDefault();
-        const errors = validate(personData);
+        const errors = validate(starshipsData);
 
         if (Object.keys(errors).length) {
             return;
         }
 
         if (editMode) {
-            const newPeopleList = people.map(person => person.id === personData.id ? personData : person);
-            dispatch(setPeople(newPeopleList))
+            const newStarshipsList = starships.map(starship => starship.id === starshipsData.id ? starshipsData : starship);
+            dispatch(setStarship(newStarshipsList))
         } else {
-            people.push({...personData, beloved: false, id: nanoid()});
-            dispatch(setPeople(people));
+            starships.push({...starshipsData, beloved: false, id: nanoid()});
+            dispatch(setStarship(starships));
         }
-        history.push('/people')
+        history.push('/starships')
     }
 
     const handleChange = (event) => {
         const {currentTarget: input} = event;
-        const data = {...personData};
+        const data = {...starshipsData};
         const errors = {...formErrors};
         if (errors[input.name]) {
             delete errors[input.name];
         }
 
         data[input.name] = input.value;
-        setPersonData(data);
+        setStarshipsData(data);
         setFormErrors(errors)
     }
 
     return (
         <form>
-            {peopleColumns.map(peopleColName => (
+            {starshipsColumns.map(starshipColName => (
                 <Input
-                    key={peopleColName}
-                    name={peopleColName}
-                    label={peopleColName[0].toUpperCase() + peopleColName.slice(1)}
-                    value={personData[peopleColName]}
-                    type={peopleColName === 'beloved' ? 'checkbox' : 'input'}
-                    error={formErrors[peopleColName]}
+                    key={starshipColName}
+                    name={starshipColName}
+                    label={starshipColName[0].toUpperCase() + starshipColName.slice(1)}
+                    value={starshipsData[starshipColName]}
+                    type={starshipColName === 'beloved' ? 'checkbox' : 'input'}
+                    error={formErrors[starshipColName]}
                     onChange={event => handleChange(event)}
                 />
             ))}
@@ -96,4 +94,4 @@ const PeopleForm = ({history, match}) => {
     );
 };
 
-export default PeopleForm;
+export default StarshipForm;
